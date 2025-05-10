@@ -21,7 +21,7 @@ void print_comment (const char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
-  printf("\t; ");
+  printf("\t\t; ");
   vprintf(fmt, ap);
   va_end(ap);
 }
@@ -37,8 +37,6 @@ void print_comment (const char *fmt, ...)
 #define print_f23() (print_func(RVM_FNC(i) & RVM_F23MASK))
 
 #define comma() (printf(", "))
-#define print_jmp() (print_comment("<%lx>", pc + \
-          RVM_SGXTD(RVM_FNC(i) & RVM_F23MASK, 23)))
 
 #define print_imm11s() (print_comment("%d", (int) \
           RVM_SGXTD(RVM_FNC(i) & RVM_F11MASK, 11)))
@@ -66,7 +64,9 @@ void print_inst (unsigned long pc, rvm_inst_t i)
 
   switch (opc) {
     case RVM_OP_nop:
+    case RVM_OP_ret:
       break;
+
     case RVM_OP_mov:
     case RVM_OP_cmp:
     case RVM_OP_cpl:
@@ -78,25 +78,49 @@ void print_inst (unsigned long pc, rvm_inst_t i)
       comma();
       print_rgB();
       break;
+
     case RVM_OP_trap:
       print_func(RVM_FNC(i) & 0xff);
       print_comment("%d", RVM_FNC(i) & 0xff);
       break;
+
     case RVM_OP_li:
+    case RVM_OP_cmpi:
       print_rgA();
       comma();
       print_f19();
       print_imm19s();
       break;
-    case RVM_OP_j:
-      print_f23();
-      print_jmp();
-      break;
-    case RVM_OP_cmpi:
+
+    case RVM_OP_adr:
+    case RVM_OP_loop:
       print_rgA();
       comma();
-      print_imm19s();
+      printf("%lx", (pc +
+          RVM_SGXTD(RVM_FNC(i) & RVM_F19MASK, 19)) << 2);
       break;
+
+    case RVM_OP_j:
+    case RVM_OP_je:
+    case RVM_OP_jne:
+    case RVM_OP_jg:
+    case RVM_OP_ja:
+    case RVM_OP_jl:
+    case RVM_OP_jb:
+    case RVM_OP_jge:
+    case RVM_OP_jae:
+    case RVM_OP_jle:
+    case RVM_OP_jbe:
+    case RVM_OP_call:
+      printf("%lx", (pc + \
+          RVM_SGXTD(RVM_FNC(i) & RVM_F23MASK, 23)) << 2);
+      break;
+
+    case RVM_OP_jr:
+    case RVM_OP_callr:
+      print_rgA();
+      break;
+
     case RVM_OP_add:
     case RVM_OP_sub:
     case RVM_OP_mul:
@@ -115,38 +139,40 @@ void print_inst (unsigned long pc, rvm_inst_t i)
       comma();
       print_rgC();
       break;
+
     case RVM_OP_addi:
     case RVM_OP_subi:
     case RVM_OP_muli:
     case RVM_OP_divi:
     case RVM_OP_modi:
+    case RVM_OP_mulsi:
+    case RVM_OP_divsi:
     case RVM_OP_andi:
     case RVM_OP_orri:
     case RVM_OP_xori:
-      print_rgA();
-      comma();
-      print_rgB();
-      comma();
-      print_f15();
-      print_imm15u();
-      break;
-    case RVM_OP_mulsi:
-    case RVM_OP_divsi:
-      print_rgA();
-      comma();
-      print_rgB();
-      comma();
-      print_f15();
-      print_imm15s();
-      break;
     case RVM_OP_shli:
     case RVM_OP_shri:
       print_rgA();
       comma();
       print_rgB();
       comma();
-      print_func(RVM_FNC(i) & 63);
-      print_comment("%d", RVM_FNC(i) & 63);
+      print_f15();
+      break;
+
+    case RVM_OP_rd8:
+    case RVM_OP_wr8:
+    case RVM_OP_rd16:
+    case RVM_OP_wr16:
+    case RVM_OP_rd32:
+    case RVM_OP_wr32:
+    case RVM_OP_rd64:
+    case RVM_OP_wr64:
+      print_rgA();
+      comma();
+      putc('[', stdout);
+      print_rgB();
+      printf(" + #%d]",
+         (int)RVM_SGXTD(RVM_FNC(i) & RVM_F15MASK, 15));
       break;
   }
 

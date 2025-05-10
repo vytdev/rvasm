@@ -20,7 +20,7 @@ int disas_file (char *prog, char *path)
   rvm_inst_t *insts = (rvm_inst_t*)(void*)mem;
   unsigned long inst_num = sz >> 2;
   for (unsigned long i = 0; i < inst_num; i++) {
-    printf(" %6lx:    ", i);
+    printf(" %6lx:    ", i << 2);
     print_inst(i+1, insts[i]);
   }
 
