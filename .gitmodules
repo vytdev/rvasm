@@ -1,0 +1,4 @@
+[submodule "rvm"]
+	path = rvm
+	url = https://github.com/vytdev/rvm.git
+	branch = master
