@@ -39,3 +39,14 @@ char *read_bin_file (char *path, size_t *out_sz)
   fclose(fp);
   return mem;
 }
+
+
+char *to_mnemonic (int op)
+{
+  switch (op) {
+#define DEF(op, idx) case (idx): return #op ;
+#include "rvm/opcodes.h"
+#undef DEF
+  default: return ".raw";
+  }
+}
