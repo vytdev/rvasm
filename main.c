@@ -15,7 +15,7 @@ int disas_file (char *prog, char *path)
     return 1;
   }
 
-  printf("\n\nDisassembly of file:    %s\n\n", path);
+  printf("\nDisassembly of file:    %s\n\n", path);
 
   rvm_inst_t *insts = (rvm_inst_t*)(void*)mem;
   unsigned long inst_num = sz >> 2;
