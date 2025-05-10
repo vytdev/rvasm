@@ -37,10 +37,8 @@ int disas_file (char *prog, char *path)
 
   rvm_inst_t *insts = (rvm_inst_t*)(void*)mem;
   unsigned long inst_num = sz >> 2;
-  for (unsigned long i = 0; i < inst_num; i++) {
-    printf(" %6lx:    ", i << 2);
+  for (unsigned long i = 0; i < inst_num; i++)
     print_inst(i+1, insts[i]);
-  }
 
   free(mem);
   return 1;
@@ -52,6 +50,11 @@ int main (int argc, char **argv)
   if (argc < 2) {
     fprintf(stderr, ""
       "usage: %s FILE...\n"
+      RVM_LABEL " Bytecode Disassembler\n"
+      "Copyright (C) 2025  Vincent Yanzee J. Tan\n"
+      "This program is licensed under the GNU General Public\n"
+      "License v3 or later. See <https://www.gnu.org/licenses/>\n"
+      "for details.\n"
       , argv[0]);
     return 1;
   }

@@ -4,5 +4,5 @@ Disassembles [rvm](https://github.com/vytdev/rvm) bytecode.
 
 ## License
 
-&copy; 2025 Vincent Yanzee J. Tan. Licensed under the
-[GNU GPL v3.0 License](./COPYING).
+&copy; 2025 Vincent Yanzee J. Tan. This project is licensed under
+[GNU GPL v3.0 or later](./COPYING).
