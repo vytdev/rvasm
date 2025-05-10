@@ -77,7 +77,7 @@ void print_comment (const char *fmt, ...)
 
 void print_inst (unsigned long pc, rvm_inst_t i)
 {
-  printf(" %6lx:    ", pc << 2);
+  printf(" %6lx:    ", (pc-1) << 2);
 
   int opc = RVM_OPC(i);
   printf("%08x    %-10s", i, to_mnemonic(opc));
