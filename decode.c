@@ -71,8 +71,6 @@ void print_inst (unsigned long pc, rvm_inst_t i)
     case RVM_OP_cmp:
     case RVM_OP_cpl:
     case RVM_OP_neg:
-    case RVM_OP_inc:
-    case RVM_OP_dec:
     case RVM_OP_swp:
       print_rgA();
       comma();
@@ -116,6 +114,8 @@ void print_inst (unsigned long pc, rvm_inst_t i)
           RVM_SGXTD(RVM_FNC(i) & RVM_F23MASK, 23)) << 2);
       break;
 
+    case RVM_OP_inc:
+    case RVM_OP_dec:
     case RVM_OP_jr:
     case RVM_OP_callr:
       print_rgA();
