@@ -19,9 +19,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "rvm/rvm.h"
 
-#define BUFFSZ 4096
+#include "rvm/rvm.h"
+#include "utils.h"
 
 
 /*
@@ -224,48 +224,6 @@ void print_inst (unsigned long pc, rvm_inst_t i)
   }
 
   putc('\n', stdout);
-}
-
-
-/*
- * Read binary file.
- */
-char *read_bin_file (char *path, size_t *out_sz)
-{
-  FILE *fp;
-  size_t sz;
-  char *mem;
-  size_t curr_pos;
-  fp = fopen(path, "rb");
-  if (!fp)
-    return NULL;
-  /* get the file's size. */
-  fseek(fp, 0, SEEK_END);
-  sz = ftell(fp);
-  fseek(fp, 0, SEEK_SET);
-  *out_sz = sz;
-  /* alloc mem to load the file. */
-  mem = (char*)malloc(sz);
-  if (!mem) {
-    fclose(fp);
-    return NULL;
-  }
-  /* buffered read. */
-  curr_pos = 0;
-  while (sz) {
-    size_t rdneed, rdgot;
-    rdneed = sz > BUFFSZ ? BUFFSZ : sz;
-    rdgot = fread(mem + curr_pos, 1, rdneed, fp);
-    if (rdgot != rdneed) {
-      free(mem);
-      fclose(fp);
-      return NULL;
-    }
-    curr_pos += rdgot;
-    sz -= rdgot;
-  }
-  fclose(fp);
-  return mem;
 }
 
 

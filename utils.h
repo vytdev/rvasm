@@ -16,46 +16,33 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>  /* for size_t. */
+#ifndef RVASM_UTILS_H_
+#define RVASM_UTILS_H_   1
+
+#include <stddef.h> /* for size_t. */
 #include <stdio.h>
-#include <stdlib.h>
 
-#include "rvm/rvm.h"
-#include "rvasm.h"
-#include "utils.h"
 
+#define BUFFSZ 4096
 
 /*
- * Main.
+ * Reads a raw binary file.
  */
-int main (int argc, char **argv)
-{
-  char *src;
-  size_t sz;
-  struct Lexer l;
+char *read_bin_file (char *path, size_t *out_sz);
 
-  if (argc < 2) {
-    printf(""
-      "usage: %s FILE...\n"
-      RVM_LABEL " Bytecode Assembler\n"
-      "Copyright (C) 2025  Vincent Yanzee J. Tan\n"
-      "This program is licensed under the GNU General Public\n"
-      "License v3 or later. See <https://www.gnu.org/licenses/>\n"
-      "for details.\n"
-      , argv[0]);
-    return 1;
-  }
+/*
+ * Reads an ASCII text file. (ends with a NUL-terminator)
+ */
+char *read_ascii_file (char *path, size_t *out_sz);
 
-  src = read_ascii_file(argv[1], &sz);
+/*
+ * Buffered read.
+ */
+size_t buffed_read (char *buf, size_t sz, FILE *fp);
 
-  /* print all tokens. */
-  lex_init(&l, src, argv[1]);
-  while (lex_isact(&l)) {
-    struct Token *tok;
-    tok = lex_next(&l);
-    print_token(tok, "tok: %d\n", tok->tt);
-  }
+/*
+ * Returns the file's size.
+ */
+size_t get_file_size (FILE *fp);
 
-  free(src);
-  return 0;
-}
+#endif /* RVASM_UTILS_H_ */

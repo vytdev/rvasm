@@ -4,11 +4,11 @@ RM=        rm -rf
 CFLAGS=    -std=c89 -Wall -Werror -Wpedantic
 LDFLAGS=
 
-DIS-SRC=   rvdis.c
+DIS-SRC=   rvdis.c utils.c
 DIS-OBJ=   $(DIS-SRC:.c=.o)
 DIS-TRG=   rvdis
 
-ASM-SRC=   rvasm.c
+ASM-SRC=   lexer.c rvasm.c utils.c
 ASM-OBJ=   $(ASM-SRC:.c=.o)
 ASM-TRG=   rvasm
 
