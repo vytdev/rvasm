@@ -1,5 +1,5 @@
 /*
- *  rvdis -- An RVM bytecode disassembler.
+ *  rvasm -- An assembler and disassembler for rvm.
  *  Copyright (C) 2025  Vincent Yanzee J. Tan
  *
  *  This program is free software: you can redistribute it and/or modify

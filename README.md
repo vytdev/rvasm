@@ -1,6 +1,6 @@
-# rvdis
+# rvasm
 
-Disassembles [rvm](https://github.com/vytdev/rvm) bytecode.
+An assembler and disassembler for [rvm](https://github.com/vytdev/rvm).
 
 ## License
 

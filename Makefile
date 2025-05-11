@@ -8,14 +8,21 @@ DIS-SRC=   rvdis.c
 DIS-OBJ=   $(DIS-SRC:.c=.o)
 DIS-TRG=   rvdis
 
+ASM-SRC=   rvasm.c
+ASM-OBJ=   $(ASM-SRC:.c=.o)
+ASM-TRG=   rvasm
+
 all: build
-build: $(DIS-TRG)
+build: $(DIS-TRG) $(ASM-TRG)
 
 $(DIS-TRG): $(DIS-OBJ)
+	$(CC) $(LDFLAGS) -o $@ $^
+
+$(ASM-TRG): $(ASM-OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	$(RM) $(DIS-TRG) $(DIS-OBJ)
+	$(RM) $(DIS-TRG) $(DIS-OBJ) $(ASM-TRG) $(ASM-OBJ)
