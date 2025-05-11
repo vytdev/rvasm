@@ -18,10 +18,29 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include "rvdis.h"
+#include <stdlib.h>
 #include "rvm/rvm.h"
 
+#define BUFFSZ 4096
 
+
+/*
+ * Opcode to readabl mnemonic.
+ */
+char *to_mnemonic (int op)
+{
+  switch (op) {
+#define DEF(op, idx) case (idx): return #op ;
+#include "rvm/opcodes.h"
+#undef DEF
+  default: return ".raw";
+  }
+}
+
+
+/*
+ * Print register text.
+ */
 void print_reg (int idx)
 {
   if (idx == RVM_RSP) printf("sp");
@@ -29,12 +48,18 @@ void print_reg (int idx)
 }
 
 
+/*
+ * Print func bits as hex.
+ */
 void print_func (rvm_inst_t fn_part)
 {
   printf("#0x%x", fn_part);
 }
 
 
+/*
+ * Print a comment for annotation.
+ */
 void print_comment (const char *fmt, ...)
 {
   va_list ap;
@@ -75,11 +100,13 @@ void print_comment (const char *fmt, ...)
           RVM_ZRXTD(RVM_FNC(i) & RVM_F23MASK, 23)))
 
 
+/*
+ * Print an instruction.
+ */
 void print_inst (unsigned long pc, rvm_inst_t i)
 {
-  printf(" %6lx:    ", (pc-1) << 2);
-
   int opc = RVM_OPC(i);
+  printf(" %6lx:    ", (pc-1) << 2);
   printf("%08x    %-10s", i, to_mnemonic(opc));
 
   switch (opc) {
@@ -197,4 +224,94 @@ void print_inst (unsigned long pc, rvm_inst_t i)
   }
 
   putc('\n', stdout);
+}
+
+
+/*
+ * Read binary file.
+ */
+char *read_bin_file (char *path, size_t *out_sz)
+{
+  FILE *fp;
+  size_t sz;
+  char *mem;
+  size_t curr_pos;
+  fp = fopen(path, "rb");
+  if (!fp)
+    return NULL;
+  /* get the file's size. */
+  fseek(fp, 0, SEEK_END);
+  sz = ftell(fp);
+  fseek(fp, 0, SEEK_SET);
+  *out_sz = sz;
+  /* alloc mem to load the file. */
+  mem = (char*)malloc(sz);
+  if (!mem) {
+    fclose(fp);
+    return NULL;
+  }
+  /* buffered read. */
+  curr_pos = 0;
+  while (sz) {
+    size_t rdneed, rdgot;
+    rdneed = sz > BUFFSZ ? BUFFSZ : sz;
+    rdgot = fread(mem + curr_pos, 1, rdneed, fp);
+    if (rdgot != rdneed) {
+      free(mem);
+      fclose(fp);
+      return NULL;
+    }
+    curr_pos += rdgot;
+    sz -= rdgot;
+  }
+  fclose(fp);
+  return mem;
+}
+
+
+/*
+ * Disassemble a binary file.
+ */
+int disas_file (char *prog, char *path)
+{
+  /* read the file. */
+  size_t sz = 0;
+  rvm_inst_t *insts;
+  unsigned long inst_num, pc;
+  char *mem = read_bin_file(path, &sz);
+  if (!mem) {
+    printf("%s: Could not read file: %s\n\n", prog, path);
+    return 1;
+  }
+  printf("Disassembly of file:    %s\n\n", path);
+  insts = (rvm_inst_t*)(void*)mem;
+  inst_num = sz >> 2;
+  for (pc = 0; pc < inst_num; pc++)
+    print_inst(pc+1, insts[pc]);
+  putc('\n', stdout);
+  free(mem);
+  return 1;
+}
+
+
+/*
+ * Main.
+ */
+int main (int argc, char **argv)
+{
+  int i;
+  if (argc < 2) {
+    printf(""
+      "usage: %s FILE...\n"
+      RVM_LABEL " Bytecode Disassembler\n"
+      "Copyright (C) 2025  Vincent Yanzee J. Tan\n"
+      "This program is licensed under the GNU General Public\n"
+      "License v3 or later. See <https://www.gnu.org/licenses/>\n"
+      "for details.\n"
+      , argv[0]);
+    return 1;
+  }
+  for (i = 1; i < argc; i++)
+    disas_file(argv[0], argv[i]);
+  return 0;
 }

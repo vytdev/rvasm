@@ -1,21 +1,21 @@
 CC=        gcc
 RM=        rm -rf
 
-CFLAGS=    -std=c99 -Wall -Werror -Wpedantic
+CFLAGS=    -std=c89 -Wall -Werror -Wpedantic
 LDFLAGS=
 
-SRC=   $(wildcard *.c)
-OBJ=   $(SRC:.c=.o)
-TRG=   rvdis
+DIS-SRC=   rvdis.c
+DIS-OBJ=   $(DIS-SRC:.c=.o)
+DIS-TRG=   rvdis
 
 all: build
-build: $(TRG)
+build: $(DIS-TRG)
 
-$(TRG): $(OBJ)
+$(DIS-TRG): $(DIS-OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	$(RM) $(TRG) $(OBJ)
+	$(RM) $(DIS-TRG) $(DIS-OBJ)
