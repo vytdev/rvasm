@@ -29,7 +29,9 @@ enum TokenType {
   TK_UNKNOWN,
   TK_EOF,
   TK_NEWLN,
-  TK_COMMA
+  TK_COMMA,
+  TK_OPNAME,
+  TK_REG
 };
 
 struct Token {
@@ -51,5 +53,7 @@ struct Token *lex_curr (struct Lexer *l);
 struct Token *lex_next (struct Lexer *l);
 struct Token *lex_peek (struct Lexer *l);
 void print_token (struct Token *tok, char *fmt, ...);
+signed int get_reg_idx (char *tok, int len);
+signed int get_opcode (char *tok, int len);
 
 #endif /* RVASM_H_ */
