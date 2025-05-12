@@ -30,7 +30,7 @@
 #define isid(c) (isalnum((c)) || (c) == '_')
 
 
-void lex_init (struct Lexer *l, char *src, char *fname)
+void lex_init (Lexer *l, char *src, char *fname)
 {
   l->pos = 0;
   l->line = 1;
@@ -44,7 +44,7 @@ void lex_init (struct Lexer *l, char *src, char *fname)
 }
 
 
-static void inc (struct Lexer *l)
+static void inc (Lexer *l)
 {
   switch (l->src[l->pos++]) {
   case '\t':
@@ -63,7 +63,7 @@ static void inc (struct Lexer *l)
 }
 
 
-static char nextc (struct Lexer *l)
+static char nextc (Lexer *l)
 {
   return l->src[l->pos];
 }
@@ -72,9 +72,9 @@ static char nextc (struct Lexer *l)
 /*
  * Process the next token.
  */
-static struct Token tokenize (struct Lexer *l)
+static Token tokenize (Lexer *l)
 {
-  struct Token tok;
+  Token tok;
   char c;
   if (l->end)
     return l->tok;
@@ -158,19 +158,19 @@ static struct Token tokenize (struct Lexer *l)
 }
 
 
-int lex_isact (struct Lexer *l)
+int lex_isact (Lexer *l)
 {
   return !l->end;
 }
 
 
-struct Token *lex_curr (struct Lexer *l)
+Token *lex_curr (Lexer *l)
 {
   return &l->tok;
 }
 
 
-struct Token *lex_next (struct Lexer *l)
+Token *lex_next (Lexer *l)
 {
   if (l->lkahead.tt != TK_NONE) {
     l->tok = l->lkahead;
@@ -182,7 +182,7 @@ struct Token *lex_next (struct Lexer *l)
 }
 
 
-struct Token *lex_peek (struct Lexer *l)
+Token *lex_peek (Lexer *l)
 {
   if (l->lkahead.tt != TK_NONE)
     l->lkahead = tokenize(l);
@@ -190,7 +190,7 @@ struct Token *lex_peek (struct Lexer *l)
 }
 
 
-void print_token (struct Token *tok, char *fmt, ...)
+void print_token (Token *tok, char *fmt, ...)
 {
   int i, j;
 
@@ -271,20 +271,20 @@ signed int get_opcode (char *tok, int len)
 }
 
 
-void lst_init (struct LStack *st)
+void lst_init (LStack *st)
 {
   st->top = 0;
 }
 
 
-void lst_free (struct LStack *st)
+void lst_free (LStack *st)
 {
   while (lst_popf(st))
     ;;
 }
 
 
-struct Lexer *lst_curr (struct LStack *st)
+Lexer *lst_curr (LStack *st)
 {
   if (st->top < 1 || st->top > MAXLSTCKSZ)
     return NULL;
@@ -292,7 +292,7 @@ struct Lexer *lst_curr (struct LStack *st)
 }
 
 
-static struct Lexer *lst_push (struct LStack *st)
+static Lexer *lst_push (LStack *st)
 {
   if (st->top >= MAXLSTCKSZ) {
     printf("Exceeded max include limit of %d\n", MAXLSTCKSZ);
@@ -302,7 +302,7 @@ static struct Lexer *lst_push (struct LStack *st)
 }
 
 
-static struct Lexer *lst_pop (struct LStack *st)
+static Lexer *lst_pop (LStack *st)
 {
   if (st->top < 1)
     return NULL;
@@ -310,10 +310,10 @@ static struct Lexer *lst_pop (struct LStack *st)
 }
 
 
-struct Lexer *lst_newf (struct LStack *st, char *fname, size_t nlen)
+Lexer *lst_newf (LStack *st, char *fname, size_t nlen)
 {
   char *str, *ncopy;
-  struct Lexer *l = lst_push(st);
+  Lexer *l = lst_push(st);
   if (!l)
     return NULL;
   /* fname is from a source stream. let's get a NUL-terminated copy
@@ -332,9 +332,9 @@ struct Lexer *lst_newf (struct LStack *st, char *fname, size_t nlen)
 }
 
 
-struct Lexer *lst_popf (struct LStack *st)
+Lexer *lst_popf (LStack *st)
 {
-  struct Lexer *curr;
+  Lexer *curr;
   if (st->top < 1)
     return NULL;
   curr = lst_curr(st);

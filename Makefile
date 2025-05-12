@@ -8,7 +8,7 @@ DIS-SRC=   rvdis.c utils.c
 DIS-OBJ=   $(DIS-SRC:.c=.o)
 DIS-TRG=   rvdis
 
-ASM-SRC=   lexer.c rvasm.c utils.c
+ASM-SRC=   lexer.c pass1.c rvasm.c utils.c
 ASM-OBJ=   $(ASM-SRC:.c=.o)
 ASM-TRG=   rvasm
 

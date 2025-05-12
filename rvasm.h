@@ -25,9 +25,11 @@
 #define TABSTOP     (4)
 #define MAXLSTCKSZ  (48)
 
-typedef unsigned long sloc;
+typedef unsigned long sloc_t; /* source loc */
+typedef unsigned long rpos_t; /* position in output binary */
+typedef unsigned long rsz_t;  /* raw size */
 
-enum TokenType {
+typedef enum {
   TK_NONE,
   TK_UNKNOWN,
   TK_EOF,
@@ -35,40 +37,74 @@ enum TokenType {
   TK_COMMA,
   TK_OPNAME,
   TK_REG
-};
+} TokenType;
 
-struct Token {
-  enum TokenType   tt;
-  sloc     line, col, pos, len;
+typedef struct {
+  TokenType   tt;
+  sloc_t   line, col, pos, len;
   char    *this_ln, *text, *fname;
-};
+} Token;
 
-struct Lexer {
+typedef struct {
   char     *src, *fname, *curr_ln;
-  sloc     line, col, pos;
+  sloc_t   line, col, pos;
   int      end;
-  struct Token tok, lkahead;
-};
+  Token    tok, lkahead;
+} Lexer;
 
-struct LStack {
-  struct Lexer lex[MAXLSTCKSZ];
-  int    top;
-};
+void lex_init (Lexer *l, char *src, char *fname);
+int lex_isact (Lexer *l);
+Token *lex_curr (Lexer *l);
+Token *lex_next (Lexer *l);
+Token *lex_peek (Lexer *l);
 
-void lex_init (struct Lexer *l, char *src, char *fname);
-int lex_isact (struct Lexer *l);
-struct Token *lex_curr (struct Lexer *l);
-struct Token *lex_next (struct Lexer *l);
-struct Token *lex_peek (struct Lexer *l);
-
-void print_token (struct Token *tok, char *fmt, ...);
+void print_token (Token *tok, char *fmt, ...);
 signed int get_reg_idx (char *tok, int len);
 signed int get_opcode (char *tok, int len);
 
-void lst_init (struct LStack *st);
-void lst_free (struct LStack *st);
-struct Lexer *lst_curr (struct LStack *st);
-struct Lexer *lst_newf (struct LStack *st, char *fname, size_t nlen);
-struct Lexer *lst_popf (struct LStack *st);
+
+typedef struct {
+  Lexer  lex[MAXLSTCKSZ];
+  int    top;
+} LStack;
+
+void lst_init (LStack *st);
+void lst_free (LStack *st);
+Lexer *lst_curr (LStack *st);
+Lexer *lst_newf (LStack *st, char *fname, size_t nlen);
+Lexer *lst_popf (LStack *st);
+
+
+typedef enum {
+  IR_INSTR
+} IRType;
+
+typedef struct {
+  int     opc;
+  char    rgA;
+  char    rgB;
+  char    rgC;
+} IRInst;
+
+typedef struct {
+  IRType type;
+  rpos_t  loc;
+  rsz_t   size;
+  union {
+    IRInst i;
+  } val;
+} IRNode;
+
+typedef struct {
+  IRNode *ls;
+  size_t alloc;
+  size_t pos;
+} IRList;
+
+int ir_init (IRList *ir); /* 0 if failed */
+void ir_free (IRList *ir);
+IRNode *ir_push (IRList *ir);
+
+IRList rvasm_parse (char *path);
 
 #endif /* RVASM_H_ */

@@ -16,9 +16,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>  /* for size_t. */
 #include <stdio.h>
-#include <string.h>
 
 #include "rvm/rvm.h"
 #include "rvasm.h"
@@ -29,9 +27,6 @@
  */
 int main (int argc, char **argv)
 {
-  struct Lexer *l;
-  struct LStack st;
-
   if (argc < 2) {
     printf(""
       "usage: %s FILE...\n"
@@ -44,20 +39,7 @@ int main (int argc, char **argv)
     return 1;
   }
 
-  lst_init(&st);
-  l = lst_newf(&st, argv[1], strlen(argv[1]));
-  if (!l) {
-    printf("Could not open file: %s\n", argv[1]);
-    return 1;
-  }
+  rvasm_parse(argv[1]);
 
-  /* print all tokens. */
-  while (lex_isact(l)) {
-    struct Token *tok;
-    tok = lex_next(l);
-    print_token(tok, "tok: %d\n", tok->tt);
-  }
-
-  lst_free(&st);
   return 0;
 }
