@@ -20,7 +20,7 @@
 #define RVASM_H_   1
 
 #include <stddef.h>
-
+#include "utils.h"
 
 #define TABSTOP     (4)
 #define MAXLSTCKSZ  (48)
@@ -62,16 +62,10 @@ signed int get_reg_idx (char *tok, int len);
 signed int get_opcode (char *tok, int len);
 
 
-typedef struct {
-  Lexer  lex[MAXLSTCKSZ];
-  int    top;
-} LStack;
-
-void lst_init (LStack *st);
-void lst_free (LStack *st);
-Lexer *lst_curr (LStack *st);
-Lexer *lst_newf (LStack *st, char *fname, size_t nlen);
-Lexer *lst_popf (LStack *st);
+void lst_free (void);
+Lexer *lst_curr (void);
+Lexer *lst_newf (char *fname, size_t nlen);
+Lexer *lst_popf (void);
 
 
 typedef enum {
@@ -85,25 +79,24 @@ typedef struct {
   char    rgC;
 } IRInst;
 
-typedef struct {
-  IRType type;
+typedef struct IRNode IRNode;
+struct IRNode {
+  IRNode *next;
+  IRType  type;
   rpos_t  loc;
   rsz_t   size;
   union {
     IRInst i;
   } val;
-} IRNode;
+};
 
-typedef struct {
-  IRNode *ls;
-  size_t alloc;
-  size_t pos;
-} IRList;
+void ir_init (void);
+IRNode *ir_push (void);
 
-int ir_init (IRList *ir); /* 0 if failed */
-void ir_free (IRList *ir);
-IRNode *ir_push (IRList *ir);
+int rvasm_parse (char *path);
 
-IRList rvasm_parse (char *path);
+
+extern Arena *glob_mem;
+#define alloc(s)  (arena_alloc(glob_mem, (s)))
 
 #endif /* RVASM_H_ */

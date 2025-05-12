@@ -21,6 +21,8 @@
 #include "rvm/rvm.h"
 #include "rvasm.h"
 
+Arena *glob_mem = NULL;
+
 
 /*
  * Main.
@@ -39,7 +41,10 @@ int main (int argc, char **argv)
     return 1;
   }
 
+  glob_mem = arena_new(0);
+
   rvasm_parse(argv[1]);
 
+  arena_free(glob_mem);
   return 0;
 }

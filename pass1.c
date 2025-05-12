@@ -18,76 +18,39 @@
 
 #include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "rvasm.h"
 
 
-int ir_init (IRList *ir)
+IRNode *ir_push (void)
 {
-  ir->ls = (IRNode*)malloc(sizeof(IRNode) * 1024);
-  if (!ir->ls)
-    return 0;
-  ir->pos = 0;
-  ir->alloc = 1024;
-  return 1;
+  IRNode *node = (IRNode*)alloc(sizeof(IRNode));
+  static IRNode *ir_head = NULL, *ir_tail = NULL;
+  node->next = NULL;
+  if (!ir_head)
+    ir_head = node;
+  if (ir_tail)
+    ir_tail->next = node;
+  ir_tail = node;
+  return node;
 }
 
 
-void ir_free (IRList *ir)
+int rvasm_parse (char *path)
 {
-  if (ir->ls)
-    free(ir->ls);
-  ir->ls = NULL;
-  ir->alloc = 0;
-  ir->pos = 0;
-}
-
-
-static int ir_resize (IRList *ir)
-{
-  IRNode *newls;
-  size_t newsz = ir->alloc * 2;
-  newls = (IRNode*)realloc(ir->ls, sizeof(IRNode) * newsz);
-  if (!newls)
-    return 0;
-  ir->ls = newls;
-  ir->alloc = newsz;
-  return 1;
-}
-
-
-IRNode *ir_push (IRList *ir)
-{
-  if (ir->alloc >= ir->pos)
-    if (!ir_resize(ir))
-      return NULL;
-  return &ir->ls[ir->pos++];
-}
-
-
-IRList rvasm_parse (char *path)
-{
-  IRList ir;
-  LStack st;
-  Lexer *l;
-  ir.ls = NULL;
-
-  lst_init(&st);
-  l = lst_newf(&st, path, strlen(path));
+  Lexer *l = NULL;
+  l = lst_newf(path, strlen(path));
   if (!l) {
     printf("Could not load file: %s\n", path);
-    return ir;
+    return 0;
   }
-
   /* print all tokens. */
   while (lex_isact(l)) {
     Token *tok;
     tok = lex_next(l);
     print_token(tok, "tok: %d\n", tok->tt);
   }
-
-  lst_free(&st);
-  return ir;
+  lst_free();
+  return 1;
 }

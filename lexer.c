@@ -263,54 +263,52 @@ signed int get_opcode (char *tok, int len)
 }
 
 
-void lst_init (LStack *st)
-{
-  st->top = 0;
-}
+static Lexer lst_lex[MAXLSTCKSZ];
+static int lst_top = -1;
 
 
-void lst_free (LStack *st)
+void lst_free (void)
 {
-  while (lst_popf(st))
+  while (lst_popf())
     ;;
 }
 
 
-Lexer *lst_curr (LStack *st)
+Lexer *lst_curr (void)
 {
-  if (st->top < 1 || st->top > MAXLSTCKSZ)
+  if (lst_top < 0 || lst_top >= MAXLSTCKSZ)
     return NULL;
-  return &st->lex[st->top - 1];
+  return &lst_lex[lst_top];
 }
 
 
-static Lexer *lst_push (LStack *st)
+static Lexer *lst_push (void)
 {
-  if (st->top >= MAXLSTCKSZ) {
+  if (lst_top >= MAXLSTCKSZ) {
     printf("Exceeded max include limit of %d\n", MAXLSTCKSZ);
     return NULL;
   }
-  return &st->lex[st->top++];
+  return &lst_lex[++lst_top];
 }
 
 
-static Lexer *lst_pop (LStack *st)
+static Lexer *lst_pop (void)
 {
-  if (st->top < 1)
+  if (lst_top < 0)
     return NULL;
-  return &st->lex[--st->top - 1];
+  return &lst_lex[--lst_top];
 }
 
 
-Lexer *lst_newf (LStack *st, char *fname, size_t nlen)
+Lexer *lst_newf (char *fname, size_t nlen)
 {
   char *str, *ncopy;
-  Lexer *l = lst_push(st);
+  Lexer *l = lst_push();
   if (!l)
     return NULL;
   /* fname is from a source stream. let's get a NUL-terminated copy
      of fname. */
-  ncopy = (char*)malloc(nlen+1);
+  ncopy = (char*)alloc(nlen+1); /* uses arena */
   if (!ncopy)
     return NULL;
   memcpy(ncopy, fname, nlen);
@@ -324,13 +322,13 @@ Lexer *lst_newf (LStack *st, char *fname, size_t nlen)
 }
 
 
-Lexer *lst_popf (LStack *st)
+Lexer *lst_popf (void)
 {
   Lexer *curr;
-  if (st->top < 1)
+  if (lst_top < 0)
     return NULL;
-  curr = lst_curr(st);
-  free(curr->fname);
+  curr = lst_curr();
+  /* tokens might still reference fnames */
   free(curr->src);
-  return lst_pop(st);
+  return lst_pop();
 }
