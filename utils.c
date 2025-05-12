@@ -31,7 +31,9 @@ char *read_bin_file (char *path, size_t *out_sz)
   fp = fopen(path, "rb");
   if (!fp)
     return NULL;
-  *out_sz = sz = get_file_size(fp);
+  sz = get_file_size(fp);
+  if (out_sz)
+    *out_sz = sz;
   /* alloc mem to load the file. */
   mem = (char*)malloc(sz);
   if (!mem) {
@@ -57,7 +59,9 @@ char *read_ascii_file (char *path, size_t *out_sz)
   fp = fopen(path, "rb");
   if (!fp)
     return NULL;
-  *out_sz = sz = get_file_size(fp);
+  sz = get_file_size(fp);
+  if (out_sz)
+    *out_sz = sz;
   /* alloc mem to load the file. +1 for NUL */
   mem = (char*)malloc(sz + 1);
   if (!mem) {

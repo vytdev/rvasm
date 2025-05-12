@@ -19,8 +19,11 @@
 #ifndef RVASM_H_
 #define RVASM_H_   1
 
+#include <stddef.h>
 
-#define TABSTOP  (4)
+
+#define TABSTOP     (4)
+#define MAXLSTCKSZ  (48)
 
 typedef unsigned long sloc;
 
@@ -47,13 +50,25 @@ struct Lexer {
   struct Token tok, lkahead;
 };
 
+struct LStack {
+  struct Lexer lex[MAXLSTCKSZ];
+  int    top;
+};
+
 void lex_init (struct Lexer *l, char *src, char *fname);
 int lex_isact (struct Lexer *l);
 struct Token *lex_curr (struct Lexer *l);
 struct Token *lex_next (struct Lexer *l);
 struct Token *lex_peek (struct Lexer *l);
+
 void print_token (struct Token *tok, char *fmt, ...);
 signed int get_reg_idx (char *tok, int len);
 signed int get_opcode (char *tok, int len);
+
+void lst_init (struct LStack *st);
+void lst_free (struct LStack *st);
+struct Lexer *lst_curr (struct LStack *st);
+struct Lexer *lst_newf (struct LStack *st, char *fname, size_t nlen);
+struct Lexer *lst_popf (struct LStack *st);
 
 #endif /* RVASM_H_ */

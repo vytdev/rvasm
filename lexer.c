@@ -18,11 +18,14 @@
 
 #include <ctype.h>
 #include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "rvasm.h"
 #include "rvm/defs.h"
+#include "utils.h"
 
 #define isid(c) (isalnum((c)) || (c) == '_')
 
@@ -265,4 +268,77 @@ signed int get_opcode (char *tok, int len)
 #include "rvm/opcodes.h"
 #undef DEF
   return -1;
+}
+
+
+void lst_init (struct LStack *st)
+{
+  st->top = 0;
+}
+
+
+void lst_free (struct LStack *st)
+{
+  while (lst_popf(st))
+    ;;
+}
+
+
+struct Lexer *lst_curr (struct LStack *st)
+{
+  if (st->top < 1 || st->top > MAXLSTCKSZ)
+    return NULL;
+  return &st->lex[st->top - 1];
+}
+
+
+static struct Lexer *lst_push (struct LStack *st)
+{
+  if (st->top >= MAXLSTCKSZ) {
+    printf("Exceeded max include limit of %d\n", MAXLSTCKSZ);
+    return NULL;
+  }
+  return &st->lex[st->top++];
+}
+
+
+static struct Lexer *lst_pop (struct LStack *st)
+{
+  if (st->top < 1)
+    return NULL;
+  return &st->lex[--st->top - 1];
+}
+
+
+struct Lexer *lst_newf (struct LStack *st, char *fname, size_t nlen)
+{
+  char *str, *ncopy;
+  struct Lexer *l = lst_push(st);
+  if (!l)
+    return NULL;
+  /* fname is from a source stream. let's get a NUL-terminated copy
+     of fname. */
+  ncopy = (char*)malloc(nlen+1);
+  if (!ncopy)
+    return NULL;
+  memcpy(ncopy, fname, nlen);
+  ncopy[nlen] = '\0';
+  /* read the file */
+  str = read_ascii_file(ncopy, NULL);
+  if (!str)
+    return NULL;
+  lex_init(l, str, ncopy);
+  return l;
+}
+
+
+struct Lexer *lst_popf (struct LStack *st)
+{
+  struct Lexer *curr;
+  if (st->top < 1)
+    return NULL;
+  curr = lst_curr(st);
+  free(curr->fname);
+  free(curr->src);
+  return lst_pop(st);
 }
