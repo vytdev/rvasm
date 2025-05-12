@@ -23,6 +23,52 @@
 #include "utils.h"
 
 
+Arena *arena_new (size_t sz)
+{
+  Arena *ar;
+  if (sz == 0)
+    sz = DEFARENASZ;
+  ar = (Arena*)malloc(sizeof(Arena)-1 + sz);
+  if (!ar)
+    return NULL;
+  ar->next = NULL;
+  ar->pos = 0;
+  ar->size = sz;
+  return ar;
+}
+
+
+void arena_free (Arena *ar)
+{
+  if (!ar)
+    return;
+  arena_free(ar->next);
+  free(ar);
+}
+
+
+void *arena_alloc (Arena *ar, size_t sz)
+{
+  if (!ar)
+    return NULL;
+  /* align to 8 bytes */
+  ar->pos = (ar->pos + 7) & ~7;
+  if (ar->size - ar->pos > sz) {
+    void *ptr = &ar->mem[ar->pos];
+    ar->pos += sz;
+    return ptr;
+  }
+  /* need more space */
+  if (!ar->next) {
+    size_t nsz = ar->size << 1;
+    if (sz > nsz)
+      nsz = sz;
+    ar->next = arena_new(nsz);
+  }
+  return arena_alloc(ar->next, sz);
+}
+
+
 char *read_bin_file (char *path, size_t *out_sz)
 {
   FILE *fp;

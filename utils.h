@@ -23,7 +23,31 @@
 #include <stdio.h>
 
 
-#define BUFFSZ 4096
+#define BUFFSZ      (4096)
+#define DEFARENASZ  (16384) /* 16K */
+
+typedef struct Arena Arena;
+struct Arena {
+  Arena *next;
+  size_t size;
+  size_t pos;
+  char mem[1];
+};
+
+/*
+ * Creates a new arena allocator.
+ */
+Arena *arena_new (size_t sz);
+
+/*
+ * Free an entire arena.
+ */
+void arena_free (Arena *ar);
+
+/*
+ * Allocate from stack. Returns an 8-byte aligned block.
+ */
+void *arena_alloc (Arena *ar, size_t sz);
 
 /*
  * Reads a raw binary file.
