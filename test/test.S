@@ -1,6 +1,7 @@
 ; This is a test assembly file.
 ; Used to assess the assembler's capabilities.
 
-mov r0, r1       ; copy r1 to r0
+mov r0, r1
+rd32 r1, [sp]   ; load from stack
 swp r1, r2
-shl r2, r2, r1
+add r0, r1, r2

@@ -28,6 +28,8 @@
 #include "utils.h"
 
 #define isid(c) (isalnum((c)) || (c) == '_')
+#define ign(c)  (isspace((c)) || (c) == ',' || \
+                 (c) == '[' || (c) == ']' || (c) == '+')
 
 
 void lex_init (Lexer *l, char *src, char *fname)
@@ -108,8 +110,8 @@ static Token tokenize (Lexer *l)
     }
 
     /* skip spaces (except line/cr) */
-    if (isspace(c) || c == ',') {
-      while ((isspace(c) || c == ',') && c != '\n') {
+    if (ign(c)) {
+      while (ign(c) && c != '\n') {
         inc(l);
         c = nextc(l);
       }
