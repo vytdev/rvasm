@@ -34,7 +34,6 @@ typedef enum {
   TK_UNKNOWN,
   TK_EOF,
   TK_NEWLN,
-  TK_COMMA,
   TK_OPNAME,
   TK_REG
 } TokenType;

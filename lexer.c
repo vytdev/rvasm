@@ -108,8 +108,8 @@ static Token tokenize (Lexer *l)
     }
 
     /* skip spaces (except line/cr) */
-    if (isspace(c)) {
-      while (isspace(c) && c != '\n') {
+    if (isspace(c) || c == ',') {
+      while ((isspace(c) || c == ',') && c != '\n') {
         inc(l);
         c = nextc(l);
       }
@@ -123,14 +123,6 @@ static Token tokenize (Lexer *l)
         c = nextc(l);
       }
       continue;
-    }
-
-    /* comma */
-    if (c == ',') {
-      inc(l);
-      tok.tt = TK_COMMA;
-      tok.len = 1;
-      break;
     }
 
     /* op mnemonics and regs */
